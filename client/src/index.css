@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-carbon-black: #0B0B0B;
+  --color-titanium-silver: #E1E1E1;
+  --color-f1-red: #FF1801;
+  --color-f1-dark: #15151E;
+  --color-f1-gray: #38383F;
+
+  --font-orbitron: "Orbitron", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  --background-image-hero-gradient: linear-gradient(to bottom, rgba(11, 11, 11, 0.4), #0B0B0B);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-carbon-black);
+    color: var(--color-titanium-silver);
+    font-family: var(--font-inter);
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-orbitron);
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+  }
+}
+
+/* Custom Webkit Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0B0B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #38383F;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF1801;
+}
+
+@utility glass-panel {
+  background-color: var(--color-white, #fff);
+  opacity: 0.05;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@utility text-gradient {
+  background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, white, var(--color-titanium-silver));
+}
