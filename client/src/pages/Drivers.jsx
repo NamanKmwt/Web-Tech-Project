@@ -4,7 +4,7 @@ import Leaderboard from '../components/Leaderboard';
 
 const Drivers = () => {
     return (
-        <div className="pt-28 pb-20 min-h-screen bg-carbon-black text-white">
+        <div className="pt-28 pb-20 min-h-screen bg-carbon-black text-white overflow-visible">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}

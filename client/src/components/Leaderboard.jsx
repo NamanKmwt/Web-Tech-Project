@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useSWR from 'swr';
 import { fetcher, API_BASE } from '../utils/fetcher';
@@ -11,50 +11,76 @@ const driverColors = {
     'Aston Martin': '#006F62'
 };
 
-const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
-    const { data: drivers, error } = useSWR(`${API_BASE}/drivers`, fetcher, { suspense: true });
+const getHighResImage = (url) => {
+    if (!url) return '';
+    // OpenF1 usually points to F1's CDN. 
+    // We swap the standard thumbnail sizes (.60. or /medium/) for high-res versions (.1024. or /transform/2col/)
+    return url
+        .replace('.60.', '.1024.') 
+        .replace('/transform/2col/', '/transform/4col/')
+        .replace('medium', 'large');
+};
 
-    if (error) return <div className="text-red-500">Failed to load standings.</div>;
+const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
+    const [gridData, setGridData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('http://localhost:5001/api/f1/current-grid')
+            .then(res => res.json())
+            .then(data => {
+                setGridData(data);
+                setLoading(false);
+            })
+            .catch(() => setLoading(false));
+    }, []);
+
+    if (loading) return <LeaderboardSkeleton />;
+    if (!gridData || !gridData.drivers) return <div className="text-red-500">Failed to load standings.</div>;
 
     return (
         <>
             <div className="w-full lg:w-2/3 flex flex-col space-y-2">
-                {drivers.slice(0, 5).map((driver, index) => {
+                {(gridData?.drivers || []).map((driver, index) => {
                     const rank = index + 1;
-                    const color = driverColors[driver.team] || '#ffffff';
+                    // Use the color from API if available, fallback to your constant
+                    const color = driver.team_colour ? `#${driver.team_colour}` : (driverColors[driver.team_name] || '#ffffff');
 
                     return (
                         <motion.div
-                            key={driver.id}
+                            // CHANGED: Use driver_number instead of id
+                            key={driver.driver_number} 
                             onMouseEnter={() => setHoveredDriver(driver)}
                             onMouseLeave={() => setHoveredDriver(null)}
-                            className={`flex items-center justify-between p-4 border-l-4 transition-all duration-300 cursor-pointer ${hoveredDriver?.id === driver.id ? 'bg-white/10' : 'bg-carbon-black hover:bg-white/5'
-                                }`}
+                            className={`flex items-center justify-between p-4 border-l-4 transition-all duration-300 cursor-pointer ${
+                                // CHANGED: Compare driver_number
+                                hoveredDriver?.driver_number === driver.driver_number ? 'bg-white/10' : 'bg-carbon-black hover:bg-white/5'
+                            }`}
                             style={{ borderLeftColor: color }}
                         >
                             <div className="flex items-center space-x-6">
                                 <span className="text-3xl font-black italic text-titanium-silver w-8">{rank}</span>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white tracking-wide">{driver.name}</h3>
-                                    <p className="text-sm text-titanium-silver uppercase font-semibold">{driver.team}</p>
+                                    <h3 className="text-xl font-bold text-white tracking-wide">{driver.full_name}</h3>
+                                    <p className="text-sm text-titanium-silver uppercase font-semibold">{driver.team_name}</p>
                                 </div>
                             </div>
+                            {/* Display the Driver Number on the right */}
                             <div className="flex items-center space-x-6">
-                                <span className="text-f1-gray font-orbitron font-bold italic text-3xl opacity-30">{driver.number}</span>
-                                <div className="text-right">
-                                    <span className="block text-2xl font-bold text-white">{driver.points}</span>
-                                    <span className="text-xs text-f1-red uppercase tracking-widest">PTS</span>
-                                </div>
+                                <span className="text-f1-gray font-orbitron font-bold italic text-3xl opacity-30">
+                                    {driver.driver_number}
+                                </span>
                             </div>
                         </motion.div>
                     );
                 })}
             </div>
 
-            <div className="w-full lg:w-1/3 aspect-[3/4] bg-carbon-black relative overflow-hidden border border-white/10 hidden lg:block">
+            <div className="w-full lg:w-1/3 aspect-[3/4] bg-carbon-black overflow-hidden relative border border-white/10 hidden lg:block sticky top-24 self-start">
                 <AnimatePresence mode="wait">
                     <motion.div
-                        key={hoveredDriver?.id || 'default'}
+                        // CHANGED: Use driver_number
+                        key={hoveredDriver?.driver_number || 'default'}
                         initial={{ opacity: 0, scale: 1.1 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
@@ -62,9 +88,12 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
                         className="absolute inset-0 flex items-end justify-center pb-0"
                     >
                         {hoveredDriver ? (
-                            <div
-                                className="absolute inset-0 bg-cover bg-center transition-all duration-300 pointer-events-none"
-                                style={{ backgroundImage: `url('${hoveredDriver.imageUrl}')` }}
+                            <div className="absolute inset-0 bg-contain bg-no-repeat bg-bottom transition-all duration-300 pointer-events-none"
+                                style={{ 
+                                    // APPLY HELPER HERE:
+                                    backgroundImage: `url('${getHighResImage(hoveredDriver.headshot_url)}')`, 
+                                    backgroundSize: '450px' 
+                                }}
                             />
                         ) : (
                             <div className="flex items-center justify-center h-full w-full opacity-30">
@@ -94,7 +123,7 @@ const Leaderboard = () => {
     const [hoveredDriver, setHoveredDriver] = useState(null);
 
     return (
-        <section className="py-24 bg-f1-dark relative overflow-hidden">
+        <section className="py-24 bg-f1-dark relative">
             <div className="absolute top-0 right-0 opacity-5 pointer-events-none z-0">
                 <h2 className="text-[20vw] font-black italic text-white leading-none">STANDINGS</h2>
             </div>
