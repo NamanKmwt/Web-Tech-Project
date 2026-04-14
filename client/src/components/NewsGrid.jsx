@@ -88,25 +88,27 @@ const NewsGrid = () => {
 
     return (
         <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-            <div className="flex justify-between items-end mb-12">
+            <div className="mb-12">
                 <div>
                     <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter text-white mb-2">LATEST <span className="text-f1-red">NEWS</span></h2>
                     <p className="text-titanium-silver text-lg">The stories shaping the championship.</p>
                 </div>
-                {/* 5. Add onClick handler and dynamic text/icon to the button */}
-                <button
-                    onClick={() => setShowAll(!showAll)}
-                    className="hidden md:flex items-center space-x-2 text-white hover:text-f1-red transition-colors duration-300 font-bold tracking-widest uppercase text-sm"
-                >
-                    <span>{showAll ? 'Show Less' : 'View All'}</span>
-                    <ArrowUpRight size={20} className={`transform transition-transform ${showAll ? 'rotate-180' : ''}`} />
-                </button>
             </div>
 
             <Suspense fallback={<NewsGridSkeleton />}>
                 {/* 6. Pass the state down to the list */}
                 <ArticleList showAll={showAll} />
             </Suspense>
+
+            <div className="mt-10 flex justify-center">
+                <button
+                    onClick={() => setShowAll(!showAll)}
+                    className="inline-flex items-center space-x-2 px-8 py-3 bg-f1-red text-white border border-f1-red uppercase tracking-widest text-xs font-black rounded-lg hover:bg-white hover:text-carbon-black hover:border-white transition-all duration-300 shadow-[0_0_20px_rgba(255,24,1,0.35)] hover:shadow-[0_0_24px_rgba(255,255,255,0.2)]"
+                >
+                    <span>{showAll ? 'Show Less' : 'View More'}</span>
+                    <ArrowUpRight size={20} className={`transform transition-transform ${showAll ? 'rotate-180' : ''}`} />
+                </button>
+            </div>
         </section>
     );
 };

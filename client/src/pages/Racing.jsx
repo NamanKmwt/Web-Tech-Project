@@ -166,7 +166,7 @@ const Racing = () => {
                                         </div>
 
                                         {/* Right Side: Date & Button */}
-                                        <div className="relative z-10 flex items-center space-x-8 w-full md:w-auto justify-between md:justify-end mt-4 md:mt-0">
+                                        <div className="relative z-10 flex items-center gap-3 sm:gap-6 w-full md:w-auto justify-between md:justify-end mt-4 md:mt-0">
                                             <div className="text-left md:text-right bg-black/50 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
                                                 <span className={`block text-xl font-bold ${isCompleted ? 'text-white/70' : 'text-white'}`}>
                                                     {formatRaceDate(race.date_start)}
@@ -185,7 +185,7 @@ const Racing = () => {
                                                             raceLocation: `${race.location}, ${race.country_name}`,
                                                         }
                                                     })}
-                                                    className="px-8 py-3 bg-white text-carbon-black border border-transparent uppercase tracking-widest text-xs font-black hover:bg-f1-red hover:text-white transition-all duration-300 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_20px_rgba(255,24,1,0.6)]"
+                                                    className="px-5 sm:px-8 py-3 bg-white text-carbon-black border border-transparent uppercase tracking-widest text-[10px] sm:text-xs font-black hover:bg-f1-red hover:text-white transition-all duration-300 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_20px_rgba(255,24,1,0.6)]"
                                                 >
                                                     Tickets
                                                 </button>

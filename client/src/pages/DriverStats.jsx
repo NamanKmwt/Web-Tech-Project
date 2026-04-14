@@ -151,7 +151,7 @@ const DriverStats = () => {
                         </div>
 
                         {/* Standard Info Grid */}
-                        <div className="grid grid-cols-2 gap-6 pt-8 border-t border-white/10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8 border-t border-white/10">
                             <div className="bg-white/5 p-6 rounded-lg border border-white/5 hover:border-white/20 transition-colors">
                                 <div className="flex items-center space-x-3 text-titanium-silver mb-2">
                                     <Activity size={20} />
@@ -168,7 +168,7 @@ const DriverStats = () => {
                                 <p className="text-4xl font-black italic text-white">{driver.name_acronym}</p>
                             </div>
 
-                            <div className="col-span-2 bg-white/5 p-6 rounded-lg border border-white/5 hover:border-white/20 transition-colors">
+                            <div className="sm:col-span-2 bg-white/5 p-6 rounded-lg border border-white/5 hover:border-white/20 transition-colors">
                                 <div className="flex items-center space-x-3 text-titanium-silver mb-2">
                                     <Flag size={20} />
                                     <span className="text-xs font-bold uppercase tracking-widest">Broadcast Name</span>
@@ -178,9 +178,9 @@ const DriverStats = () => {
 
                             {/* Telemetry Data Dashboard */}
                             {telemetry && (
-                                <div className="col-span-2 mt-2 pt-6 border-t border-white/10">
+                                <div className="sm:col-span-2 mt-2 pt-6 border-t border-white/10">
                                     <h3 className="text-sm font-bold uppercase tracking-widest text-titanium-silver mb-4">Peak Telemetry Data</h3>
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div className="bg-black/40 p-4 rounded-lg border-l-2" style={{ borderLeftColor: color }}>
                                             <div className="flex items-center space-x-2 text-titanium-silver mb-1">
                                                 <Gauge size={14} />
