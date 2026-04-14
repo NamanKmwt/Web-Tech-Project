@@ -1,5 +1,6 @@
 import React, { useState, Suspense, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown } from 'lucide-react'; // Added Chevron icon
 import useSWR from 'swr';
 import { fetcher, API_BASE } from '../utils/fetcher';
 
@@ -13,17 +14,15 @@ const driverColors = {
 
 const getHighResImage = (url) => {
     if (!url) return '';
-    // OpenF1 usually points to F1's CDN. 
-    // We swap the standard thumbnail sizes (.60. or /medium/) for high-res versions (.1024. or /transform/2col/)
-    return url
-        .replace('.60.', '.1024.') 
-        .replace('/transform/2col/', '/transform/4col/')
-        .replace('medium', 'large');
+    // This chops off the ".transform/2col/image.png" part entirely, requesting the raw original file
+    return url.split('.transform/')[0];
 };
 
 const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
     const [gridData, setGridData] = useState(null);
     const [loading, setLoading] = useState(true);
+    // 1. Add state to track if we should show all drivers
+    const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
         fetch('http://localhost:5001/api/f1/current-grid')
@@ -38,24 +37,24 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
     if (loading) return <LeaderboardSkeleton />;
     if (!gridData || !gridData.drivers) return <div className="text-red-500">Failed to load standings.</div>;
 
+    // 2. Filter the array based on state
+    const displayedDrivers = showAll ? gridData.drivers : gridData.drivers.slice(0, 10);
+
     return (
         <>
             <div className="w-full lg:w-2/3 flex flex-col space-y-2">
-                {(gridData?.drivers || []).map((driver, index) => {
+                {displayedDrivers.map((driver, index) => {
                     const rank = index + 1;
                     // Use the color from API if available, fallback to your constant
                     const color = driver.team_colour ? `#${driver.team_colour}` : (driverColors[driver.team_name] || '#ffffff');
 
                     return (
                         <motion.div
-                            // CHANGED: Use driver_number instead of id
-                            key={driver.driver_number} 
+                            key={driver.driver_number}
                             onMouseEnter={() => setHoveredDriver(driver)}
                             onMouseLeave={() => setHoveredDriver(null)}
-                            className={`flex items-center justify-between p-4 border-l-4 transition-all duration-300 cursor-pointer ${
-                                // CHANGED: Compare driver_number
-                                hoveredDriver?.driver_number === driver.driver_number ? 'bg-white/10' : 'bg-carbon-black hover:bg-white/5'
-                            }`}
+                            className={`flex items-center justify-between p-4 border-l-4 transition-all duration-300 cursor-pointer ${hoveredDriver?.driver_number === driver.driver_number ? 'bg-white/10' : 'bg-carbon-black hover:bg-white/5'
+                                }`}
                             style={{ borderLeftColor: color }}
                         >
                             <div className="flex items-center space-x-6">
@@ -65,7 +64,6 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
                                     <p className="text-sm text-titanium-silver uppercase font-semibold">{driver.team_name}</p>
                                 </div>
                             </div>
-                            {/* Display the Driver Number on the right */}
                             <div className="flex items-center space-x-6">
                                 <span className="text-f1-gray font-orbitron font-bold italic text-3xl opacity-30">
                                     {driver.driver_number}
@@ -74,12 +72,23 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
                         </motion.div>
                     );
                 })}
+
+                {/* 3. Add the Show More / Show Less Button */}
+                {gridData.drivers.length > 10 && (
+                    <motion.button
+                        layout
+                        onClick={() => setShowAll(!showAll)}
+                        className="mt-4 flex items-center justify-center space-x-2 w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 text-titanium-silver hover:text-white transition-all duration-300 font-bold tracking-widest uppercase text-sm rounded-sm"
+                    >
+                        <span>{showAll ? 'Show Less' : 'View Full Grid'}</span>
+                        <ChevronDown size={20} className={`transform transition-transform duration-300 ${showAll ? 'rotate-180' : ''}`} />
+                    </motion.button>
+                )}
             </div>
 
             <div className="w-full lg:w-1/3 aspect-[3/4] bg-carbon-black overflow-hidden relative border border-white/10 hidden lg:block sticky top-24 self-start">
                 <AnimatePresence mode="wait">
                     <motion.div
-                        // CHANGED: Use driver_number
                         key={hoveredDriver?.driver_number || 'default'}
                         initial={{ opacity: 0, scale: 1.1 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -89,10 +98,9 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
                     >
                         {hoveredDriver ? (
                             <div className="absolute inset-0 bg-contain bg-no-repeat bg-bottom transition-all duration-300 pointer-events-none"
-                                style={{ 
-                                    // APPLY HELPER HERE:
-                                    backgroundImage: `url('${getHighResImage(hoveredDriver.headshot_url)}')`, 
-                                    backgroundSize: '450px' 
+                                style={{
+                                    backgroundImage: `url('${getHighResImage(hoveredDriver.headshot_url)}')`,
+                                    backgroundSize: '450px'
                                 }}
                             />
                         ) : (
@@ -111,11 +119,11 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
 const LeaderboardSkeleton = () => (
     <>
         <div className="w-full lg:w-2/3 flex flex-col space-y-2">
-            {[1, 2, 3, 4, 5].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
                 <div key={i} className="h-24 bg-white/5 border border-white/10 animate-pulse" />
             ))}
         </div>
-        <div className="w-full lg:w-1/3 aspect-[3/4] bg-white/5 animate-pulse hidden lg:block" />
+        <div className="w-full lg:w-1/3 aspect-[3/4] bg-white/5 animate-pulse hidden lg:block sticky top-24 self-start" />
     </>
 );
 

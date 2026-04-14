@@ -7,6 +7,8 @@ import News from './pages/News';
 import Tech from './pages/Tech';
 import { AnimatePresence } from 'framer-motion';
 import ArticlePage from './pages/ArticleContent';
+import DriverData from './pages/DriverData';
+import DriverStats from './pages/DriverStats';
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
               <Route path="/news" element={<News />} />
               <Route path="/tech" element={<Tech />} />
               <Route path="/news/:id" element={<ArticlePage />} />
+              <Route path="/drivers" element={<DriverData />} />
+              <Route path="/driver/:id" element={<DriverStats />} />
             </Routes>
           </AnimatePresence>
         </main>

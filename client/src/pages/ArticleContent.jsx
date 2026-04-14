@@ -77,31 +77,33 @@ const ArticleContent = ({ id }) => {
 
             {/* 4. Next / Previous Navigation Footer */}
             <div className="mt-20 pt-10 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-6">
+                {/* Next Article Link */}
+                {nextArticle ? (
+                    <Link to={`/news/${nextArticle._id}`} className="group flex items-center justify-end gap-4 w-full sm:w-1/2 hover:bg-white/5 p-4 rounded-lg transition-colors text-right border border-transparent hover:border-white/10">
+                        <div className="overflow-hidden">
+                            <span className="text-titanium-silver text-xs font-bold uppercase tracking-widest block mb-1">Previous</span>
+                            <p className="text-white font-bold italic truncate">{nextArticle.title}</p>
+                        </div>
+                        <div className="bg-carbon-black p-2 rounded-full text-titanium-silver group-hover:text-f1-red transition-colors">
+                            <ChevronLeft size={24} />
+                        </div>
+                    </Link>
+                ) : <div className="w-full sm:w-1/2" />}
+
                 {/* Previous Article Link */}
                 {prevArticle ? (
                     <Link to={`/news/${prevArticle._id}`} className="group flex items-center gap-4 w-full sm:w-1/2 hover:bg-white/5 p-4 rounded-lg transition-colors border border-transparent hover:border-white/10">
                         <div className="bg-carbon-black p-2 rounded-full text-titanium-silver group-hover:text-f1-red transition-colors">
-                            <ChevronLeft size={24} />
+                            <ChevronRight size={24} />
                         </div>
                         <div className="overflow-hidden">
-                            <span className="text-titanium-silver text-xs font-bold uppercase tracking-widest block mb-1">Previous</span>
+                            <span className="text-titanium-silver text-xs font-bold uppercase tracking-widest block mb-1">Next</span>
                             <p className="text-white font-bold italic truncate">{prevArticle.title}</p>
                         </div>
                     </Link>
                 ) : <div className="w-full sm:w-1/2" />}
 
-                {/* Next Article Link */}
-                {nextArticle ? (
-                    <Link to={`/news/${nextArticle._id}`} className="group flex items-center justify-end gap-4 w-full sm:w-1/2 hover:bg-white/5 p-4 rounded-lg transition-colors text-right border border-transparent hover:border-white/10">
-                        <div className="overflow-hidden">
-                            <span className="text-titanium-silver text-xs font-bold uppercase tracking-widest block mb-1">Next</span>
-                            <p className="text-white font-bold italic truncate">{nextArticle.title}</p>
-                        </div>
-                        <div className="bg-carbon-black p-2 rounded-full text-titanium-silver group-hover:text-f1-red transition-colors">
-                            <ChevronRight size={24} />
-                        </div>
-                    </Link>
-                ) : <div className="w-full sm:w-1/2" />}
+
             </div>
         </motion.article>
     );

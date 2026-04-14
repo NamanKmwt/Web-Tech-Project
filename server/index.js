@@ -118,6 +118,22 @@ app.get('/api/f1/current-grid', async (req, res) => {
     }
 });
 
+app.get('/api/f1/telemetry/:id', async (req, res) => {
+    try {
+        const driverId = req.params.id;
+        const sessionKey = 9693; // Abu Dhabi fallback
+
+        // Fetch from OpenF1
+        const response = await axios.get(`https://api.openf1.org/v1/car_data?driver_number=${driverId}&session_key=${sessionKey}&speed>=300`);
+        res.json(response.data);
+    } catch (error) {
+        console.error(`Telemetry error for driver ${req.params.id}:`, error.message);
+        // If OpenF1 returns a 404 or crashes, silently return an empty array 
+        // so the frontend just gracefully hides the telemetry dashboard.
+        res.json([]);
+    }
+});
+
 app.get('/api/test-f1', async (req, res) => {
     try {
         const response = await axios.get('https://api.openf1.org/v1/sessions?year=2026');
