@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 // Helper to generate a clean filename from the API's country name
 const getScenicBackground = (countryName) => {
@@ -12,6 +13,7 @@ const getScenicBackground = (countryName) => {
 };
 
 const Racing = () => {
+    const navigate = useNavigate();
     const [races, setRaces] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('All');
@@ -175,7 +177,16 @@ const Racing = () => {
                                             </div>
 
                                             {!isCompleted && (
-                                                <button className="px-8 py-3 bg-white text-carbon-black border border-transparent uppercase tracking-widest text-xs font-black hover:bg-f1-red hover:text-white transition-all duration-300 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_20px_rgba(255,24,1,0.6)]">
+                                                <button
+                                                    onClick={() => navigate('/tickets-coming-soon', {
+                                                        state: {
+                                                            raceName: race.meeting_name,
+                                                            raceDate: race.date_start,
+                                                            raceLocation: `${race.location}, ${race.country_name}`,
+                                                        }
+                                                    })}
+                                                    className="px-8 py-3 bg-white text-carbon-black border border-transparent uppercase tracking-widest text-xs font-black hover:bg-f1-red hover:text-white transition-all duration-300 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_20px_rgba(255,24,1,0.6)]"
+                                                >
                                                     Tickets
                                                 </button>
                                             )}

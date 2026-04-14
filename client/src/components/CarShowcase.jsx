@@ -85,13 +85,7 @@ const CarShowcase = ({ items, isLoading }) => {
     }
 
     if (!selectedRace) {
-        return (
-            <section className="py-20 bg-carbon-black">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <p className="text-titanium-silver uppercase tracking-widest text-sm">No technical race data matched your filters.</p>
-                </div>
-            </section>
-        );
+        return null;
     }
 
     const condition = selectedRace.weatherNow?.condition || 'mixed';
