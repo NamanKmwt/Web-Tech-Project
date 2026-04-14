@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Flag, Users, Activity, Gauge, Zap, Settings2 } from 'lucide-react'; // Added telemetry icons
+import { ArrowLeft, ArrowRight, Flag, Users, Activity, Gauge, Zap, Settings2 } from 'lucide-react'; // Added ArrowRight
 
 const driverColors = {
     'Red Bull Racing': '#3671C6',
@@ -24,19 +24,23 @@ const getHighResImage = (url) => {
 const DriverStats = () => {
     const { id } = useParams(); // driver_number
     const [driver, setDriver] = useState(null);
+    const [allDrivers, setAllDrivers] = useState([]); // NEW: Store the full grid for navigation
     const [telemetry, setTelemetry] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // 1. Fetch the driver info from your backend
+        // Reset loading state when the ID changes so the transition feels smooth
+        setLoading(true);
+
+        // 1. Fetch the driver info and save the full grid
         const fetchDriverData = fetch('http://localhost:5001/api/f1/current-grid')
             .then(res => res.json())
-            .then(data => data.drivers.find(d => d.driver_number.toString() === id));
+            .then(data => {
+                setAllDrivers(data.drivers); // Save the whole list for prev/next
+                return data.drivers.find(d => d.driver_number.toString() === id);
+            });
 
-        // 2. Fetch the car telemetry from OpenF1 directly
-        // We use session_key 9693 (Abu Dhabi) to match your backend fallback, 
-        // and query for high speeds (>= 315) so we can extract their top stats.
-        // 2. Fetch the car telemetry from YOUR backend now
+        // 2. Fetch the car telemetry from YOUR backend
         const fetchTelemetry = fetch(`http://localhost:5001/api/f1/telemetry/${id}`)
             .then(res => res.json())
             .then(data => {
@@ -57,7 +61,7 @@ const DriverStats = () => {
             })
             .catch(() => setLoading(false));
 
-    }, [id]);
+    }, [id]); // This ensures the data re-fetches when we click Next/Prev and the URL 'id' changes
 
     if (loading) {
         return (
@@ -77,6 +81,19 @@ const DriverStats = () => {
     }
 
     const color = driver.team_colour ? `#${driver.team_colour}` : (driverColors[driver.team_name] || '#ffffff');
+
+    // --- NEW: Calculate Previous and Next Drivers ---
+    const currentIndex = allDrivers.findIndex(d => d.driver_number.toString() === id);
+    let prevDriver = null;
+    let nextDriver = null;
+
+    if (allDrivers.length > 0 && currentIndex !== -1) {
+        // If at the beginning, wrap around to the end. Otherwise, go back one.
+        prevDriver = currentIndex === 0 ? allDrivers[allDrivers.length - 1] : allDrivers[currentIndex - 1];
+        // If at the end, wrap around to the beginning. Otherwise, go forward one.
+        nextDriver = currentIndex === allDrivers.length - 1 ? allDrivers[0] : allDrivers[currentIndex + 1];
+    }
+    // ------------------------------------------------
 
     return (
         <div className="min-h-screen bg-carbon-black text-white pt-28 pb-20 relative overflow-hidden">
@@ -159,7 +176,7 @@ const DriverStats = () => {
                                 <p className="text-2xl font-bold text-white tracking-wide">{driver.broadcast_name}</p>
                             </div>
 
-                            {/* NEW: Telemetry Data Dashboard */}
+                            {/* Telemetry Data Dashboard */}
                             {telemetry && (
                                 <div className="col-span-2 mt-2 pt-6 border-t border-white/10">
                                     <h3 className="text-sm font-bold uppercase tracking-widest text-titanium-silver mb-4">Peak Telemetry Data</h3>
@@ -199,6 +216,37 @@ const DriverStats = () => {
                         </div>
                     </motion.div>
                 </div>
+
+                {/* NEW: Driver Navigation Footer */}
+                {allDrivers.length > 0 && prevDriver && nextDriver && (
+                    <div className="mt-20 pt-8 border-t border-white/10 flex justify-between items-center">
+                        <Link
+                            to={`/driver/${prevDriver.driver_number}`} // Assuming your route is /drivers/:id
+                            className="group flex flex-col items-start hover:bg-white/5 p-4 rounded-lg transition-colors"
+                        >
+                            <span className="text-titanium-silver text-xs font-bold uppercase tracking-widest mb-1 flex items-center">
+                                <ArrowLeft size={14} className="mr-2 transform group-hover:-translate-x-1 transition-transform" />
+                                Previous
+                            </span>
+                            <span className="text-2xl md:text-3xl font-black italic text-white group-hover:text-f1-red transition-colors">
+                                {prevDriver.last_name}
+                            </span>
+                        </Link>
+
+                        <Link
+                            to={`/driver/${nextDriver.driver_number}`}
+                            className="group flex flex-col items-end hover:bg-white/5 p-4 rounded-lg transition-colors text-right"
+                        >
+                            <span className="text-titanium-silver text-xs font-bold uppercase tracking-widest mb-1 flex items-center">
+                                Next
+                                <ArrowRight size={14} className="ml-2 transform group-hover:translate-x-1 transition-transform" />
+                            </span>
+                            <span className="text-2xl md:text-3xl font-black italic text-white group-hover:text-f1-red transition-colors">
+                                {nextDriver.last_name}
+                            </span>
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );
