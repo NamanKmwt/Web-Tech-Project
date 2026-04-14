@@ -19,6 +19,7 @@ mongoose.connect(process.env.MONGODB_URI)
 const Driver = require('./models/Driver');
 const Race = require('./models/Race');
 const Article = require('./models/Article');
+const RaceTech = require('./models/RaceTech');
 
 // Routes
 app.get('/api/drivers', async (req, res) => {
@@ -36,6 +37,77 @@ app.get('/api/races', async (req, res) => {
         res.json(races);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch races' });
+    }
+});
+
+app.get('/api/tech/races', async (req, res) => {
+    try {
+        const { roadType, carType, weather, riskLevel } = req.query;
+        const query = {};
+
+        if (roadType) query.roadType = roadType;
+        if (carType) query.carType = carType;
+        if (weather) query['weatherNow.condition'] = weather;
+        if (riskLevel) query.riskLevel = riskLevel;
+
+        const techData = await RaceTech.find(query)
+            .populate('raceId', 'round name circuit date status')
+            .lean();
+
+        techData.sort((a, b) => (a.raceId?.round || 0) - (b.raceId?.round || 0));
+        res.json(techData);
+    } catch (error) {
+        console.error('Race tech fetch error:', error.message);
+        res.status(500).json({ error: 'Failed to fetch race tech data' });
+    }
+});
+
+app.get('/api/tech/races/round/:round', async (req, res) => {
+    try {
+        const round = Number(req.params.round);
+        if (!Number.isFinite(round)) {
+            return res.status(400).json({ error: 'Round must be a number' });
+        }
+
+        const race = await Race.findOne({ round });
+        if (!race) {
+            return res.status(404).json({ error: 'Race not found for this round' });
+        }
+
+        const tech = await RaceTech.findOne({ raceId: race._id })
+            .populate('raceId', 'round name circuit date status')
+            .lean();
+
+        if (!tech) {
+            return res.status(404).json({ error: 'Race tech not found for this round' });
+        }
+
+        res.json(tech);
+    } catch (error) {
+        console.error('Race tech by round error:', error.message);
+        res.status(500).json({ error: 'Failed to fetch race tech by round' });
+    }
+});
+
+app.get('/api/tech/races/:raceId', async (req, res) => {
+    try {
+        const { raceId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(raceId)) {
+            return res.status(400).json({ error: 'Invalid race ID format' });
+        }
+
+        const tech = await RaceTech.findOne({ raceId })
+            .populate('raceId', 'round name circuit date status')
+            .lean();
+
+        if (!tech) {
+            return res.status(404).json({ error: 'Race tech not found' });
+        }
+
+        res.json(tech);
+    } catch (error) {
+        console.error('Race tech by ID error:', error.message);
+        res.status(500).json({ error: 'Failed to fetch race tech details' });
     }
 });
 
