@@ -47,10 +47,10 @@ const Rules = () => {
             >
                 {/* Header */}
                 <div className="mb-10 text-center md:text-left">
-                    <h1 className="font-orbitron font-black text-4xl md:text-6xl uppercase tracking-wider text-white mb-4 drop-shadow-[0_0_15px_rgba(255,24,1,0.5)]">
+                    <h1 className="font-orbitron font-black text-4xl md:text-6xl uppercase tracking-wider text-white mb-4">
                         FIA Rules & <span className="text-f1-red">Regulations</span>
                     </h1>
-                    <div className="w-24 h-1.5 bg-f1-red mb-6 mx-auto md:mx-0 rounded-full shadow-[0_0_10px_rgba(255,24,1,0.8)]"></div>
+                    <div className="w-24 h-1.5 bg-f1-red mb-6 mx-auto md:mx-0 rounded-full"></div>
                     <p className="text-gray-400 text-lg md:text-xl max-w-3xl">
                         Explore the intricate code of conduct, technical limits, and sporting formats that govern the pinnacle of motorsport.
                     </p>
@@ -72,7 +72,7 @@ const Rules = () => {
 
                 {/* Tab Navigation (only show if not intensely searching) */}
                 {!searchQuery && (
-                    <div className="flex overflow-x-auto no-scrollbar gap-3 mb-10 pb-2 -mx-4 px-4 sm:px-0 sm:mx-0">
+                    <div className="flex flex-wrap gap-2 mb-10 pb-2">
                         {rulesData.map((category) => {
                             const Icon = iconMap[category.icon];
                             const isActive = activeTab === category.category;
@@ -81,13 +81,13 @@ const Rules = () => {
                                 <button
                                     key={category.category}
                                     onClick={() => setActiveTab(category.category)}
-                                    className={`flex items-center whitespace-nowrap px-6 py-3 rounded-full font-orbitron text-sm md:text-base font-semibold tracking-wide transition-all duration-300 ${
+                                    className={`flex items-center px-4 py-2 rounded-full font-orbitron text-xs sm:text-sm font-semibold tracking-wide transition-all duration-300 border ${
                                         isActive 
-                                        ? 'bg-f1-red text-white shadow-[0_0_15px_rgba(255,24,1,0.6)] scale-105 border-transparent' 
-                                        : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10 hover:text-white'
+                                        ? 'bg-f1-red text-white border-f1-red' 
+                                        : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white'
                                     }`}
                                 >
-                                    {Icon && <Icon className={`w-4 h-4 mr-2 ${isActive ? 'text-white' : 'text-f1-red/70'}`} />}
+                                    {Icon && <Icon className={`w-3 h-3 sm:w-4 sm:h-4 mr-2 ${isActive ? 'text-white' : 'text-f1-red/70'}`} />}
                                     {category.category}
                                 </button>
                             );
@@ -117,19 +117,17 @@ const Rules = () => {
                                     exit={{ opacity: 0, y: -15 }}
                                     transition={{ duration: 0.4 }}
                                 >
-                                    {searchQuery && (
-                                        <h2 className="text-3xl font-orbitron text-white mb-6 uppercase tracking-wider flex items-center border-b border-white/10 pb-4">
-                                            {React.createElement(iconMap[section.icon], { className: "text-f1-red mr-4 w-8 h-8" })}
-                                            {section.category}
-                                        </h2>
-                                    )}
+                                    <h2 className="text-2xl md:text-3xl font-orbitron text-white mt-2 mb-8 uppercase tracking-wider flex items-center border-b border-white/10 pb-4">
+                                        {React.createElement(iconMap[section.icon], { className: "text-f1-red mr-3 md:mr-4 w-6 h-6 md:w-8 md:h-8" })}
+                                        {section.category}
+                                    </h2>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {section.rules.map((rule, idx) => (
                                             <motion.div 
                                                 key={rule.id}
                                                 whileHover={{ scale: 1.02 }}
-                                                className="bg-black/40 border border-white/10 p-6 or p-8 rounded-xl backdrop-blur-md relative overflow-hidden group hover:border-f1-red/50 transition-colors duration-300 shadow-lg"
+                                                className="bg-black/40 border border-white/10 p-6 rounded-xl backdrop-blur-md relative overflow-hidden group hover:border-f1-red/50 transition-colors duration-300 shadow-lg"
                                             >
                                                 {/* Decorative number/accent */}
                                                 <div className="absolute -right-4 -top-6 text-7xl font-orbitron font-black text-white/[0.03] group-hover:text-f1-red/[0.05] transition-colors duration-300 pointer-events-none">
