@@ -11,7 +11,7 @@ const Home = () => {
             <VideoShowcase />
             <NewsGrid />
             <Leaderboard />
-            <CarShowcase />
+
 
             {/* Footer */}
             <footer className="py-12 border-t border-white/10 text-center">
