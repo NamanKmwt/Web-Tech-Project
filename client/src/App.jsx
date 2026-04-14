@@ -7,6 +7,7 @@ import Drivers from './pages/Drivers';
 import News from './pages/News';
 import Tech from './pages/Tech';
 import Rules from './pages/Rules';
+import TicketsComingSoon from './pages/TicketsComingSoon';
 import { AnimatePresence } from 'framer-motion';
 import ArticlePage from './pages/ArticleContent';
 import DriverData from './pages/DriverData';
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/news" element={<News />} />
                 <Route path="/tech" element={<Tech />} />
                 <Route path="/rules" element={<Rules />} />
+                <Route path="/tickets-coming-soon" element={<TicketsComingSoon />} />
                 <Route path="/news/:id" element={<ArticlePage />} />
                 <Route path="/drivers" element={<DriverData />} />
                 <Route path="/driver/:id" element={<DriverStats />} />

@@ -57,7 +57,7 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
                             transition={{ duration: 0.3, delay: index * 0.05 }}
                             onMouseEnter={() => setHoveredDriver(driver)}
                             onMouseLeave={() => setHoveredDriver(null)}
-                            className={`flex items-center justify-between p-4 border-l-4 transition-all duration-300 cursor-pointer ${hoveredDriver?.driver_number === driver.driver_number ? 'bg-white/10' : 'bg-carbon-black hover:bg-white/5'
+                            className={`group flex items-center justify-between p-4 border-l-4 transition-all duration-300 cursor-pointer ${hoveredDriver?.driver_number === driver.driver_number ? 'bg-white/10' : 'bg-carbon-black hover:bg-white/5'
                                 }`}
                             style={{ borderLeftColor: color }}
                         >
@@ -69,7 +69,7 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
                                 </div>
                             </div>
                             <div className="flex items-center space-x-6">
-                                <span className="text-f1-gray font-orbitron font-bold italic text-3xl opacity-30">
+                                <span className="text-f1-gray font-orbitron font-bold italic text-3xl opacity-40 transition-all duration-300 group-hover:opacity-95 group-hover:text-white group-hover:scale-110">
                                     {driver.driver_number}
                                 </span>
                             </div>

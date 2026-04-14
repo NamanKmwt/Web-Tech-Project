@@ -85,13 +85,7 @@ const CarShowcase = ({ items, isLoading }) => {
     }
 
     if (!selectedRace) {
-        return (
-            <section className="py-20 bg-carbon-black">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <p className="text-titanium-silver uppercase tracking-widest text-sm">No technical race data matched your filters.</p>
-                </div>
-            </section>
-        );
+        return null;
     }
 
     const condition = selectedRace.weatherNow?.condition || 'mixed';
@@ -100,7 +94,7 @@ const CarShowcase = ({ items, isLoading }) => {
     const raceImage = roundImageMap[raceRound] || '/images/tech.png';
 
     return (
-        <section ref={containerRef} className="pt-4 pb-14 md:pt-6 md:pb-18 bg-carbon-black relative overflow-hidden min-h-[80vh] flex items-center">
+        <section ref={containerRef} className="pt-4 pb-14 md:pt-6 md:pb-20 bg-carbon-black relative overflow-hidden min-h-[80vh] flex items-center">
             <motion.div
                 style={{ x: textX }}
                 className="absolute top-1/2 left-0 -translate-y-1/2 w-full whitespace-nowrap opacity-[0.03] pointer-events-none z-0"
@@ -136,7 +130,7 @@ const CarShowcase = ({ items, isLoading }) => {
                                 {theme.label}. {selectedRace.setupHint}
                             </p>
 
-                            <div className="grid grid-cols-2 gap-4 mb-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                                 <div className="bg-black/35 border border-white/10 p-4">
                                     <p className="text-[11px] uppercase tracking-widest text-titanium-silver mb-2">Road Type</p>
                                     <p className="text-lg font-black italic text-white">{toTitleCase(selectedRace.roadType)}</p>
