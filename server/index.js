@@ -48,6 +48,27 @@ app.get('/api/articles', async (req, res) => {
     }
 });
 
+// Fetch a single article by ID
+app.get('/api/articles/:id', async (req, res) => {
+    try {
+        const articleId = req.params.id;
+
+        // Find the article in your MongoDB database
+        const article = await Article.findById(articleId);
+
+        if (!article) {
+            // Return a clean JSON 404 error, NOT HTML
+            return res.status(404).json({ error: 'Article not found.' });
+        }
+
+        res.json(article);
+    } catch (error) {
+        console.error("Error fetching article by ID:", error.message);
+        // This catches malformed IDs (e.g., if it's not a valid 24-character hex string)
+        res.status(500).json({ error: 'Invalid ID format or internal server error' });
+    }
+});
+
 // Hello endpoint
 app.get('/', (req, res) => {
     res.send('F1 API Server Running');
@@ -71,10 +92,10 @@ app.get('/api/f1/current-grid', async (req, res) => {
 
     try {
         console.log("Fetching fresh data from OpenF1...");
-        
+
         // Use a 2025 session key as a "Stable Fallback" while we wait for 2026 race data
         // 9693 is the 2025 Abu Dhabi GP
-        const sessionKey = 9693; 
+        const sessionKey = 9693;
 
         const driversRes = await axios.get(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`);
 
@@ -85,14 +106,14 @@ app.get('/api/f1/current-grid', async (req, res) => {
 
         // 2. Save to Cache
         f1Cache = { data: responseData, lastFetched: now };
-        
+
         res.json(responseData);
     } catch (error) {
         console.error("Backend Error:", error.message);
-        
+
         // 3. Emergency Fallback: If the API is down/rate-limited, return whatever is in cache
         if (f1Cache.data) return res.json(f1Cache.data);
-        
+
         res.status(error.response?.status || 500).json({ error: "F1 API is currently overloaded" });
     }
 });

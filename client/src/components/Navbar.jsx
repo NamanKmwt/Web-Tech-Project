@@ -33,7 +33,7 @@ const Navbar = () => {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex space-x-8">
-                        {['Racing', 'Drivers', 'News', 'Tech'].map((item) => (
+                        {['Racing', 'Leaderboard', 'News', 'Tech', 'Drivers'].map((item) => (
                             <Link
                                 key={item}
                                 to={`/${item.toLowerCase()}`}

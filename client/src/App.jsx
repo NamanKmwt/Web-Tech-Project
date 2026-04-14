@@ -6,6 +6,7 @@ import Drivers from './pages/Drivers';
 import News from './pages/News';
 import Tech from './pages/Tech';
 import { AnimatePresence } from 'framer-motion';
+import ArticlePage from './pages/ArticleContent';
 
 function App() {
   return (
@@ -17,9 +18,10 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/racing" element={<Racing />} />
-              <Route path="/drivers" element={<Drivers />} />
+              <Route path="/leaderboard" element={<Drivers />} />
               <Route path="/news" element={<News />} />
               <Route path="/tech" element={<Tech />} />
+              <Route path="/news/:id" element={<ArticlePage />} />
             </Routes>
           </AnimatePresence>
         </main>
