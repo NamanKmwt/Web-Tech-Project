@@ -2,6 +2,8 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Driver = require('./models/Driver');
 const Article = require('./models/Article');
+const Race = require('./models/Race');
+const RaceTech = require('./models/RaceTech');
 
 const driversData = [
     {
@@ -102,6 +104,180 @@ const articlesData = [
     }
 ];
 
+const racesData = [
+    {
+        round: 1,
+        name: 'Bahrain Grand Prix',
+        circuit: 'Bahrain International Circuit',
+        date: new Date('2026-03-08T15:00:00.000Z'),
+        status: 'upcoming',
+        results: []
+    },
+    {
+        round: 2,
+        name: 'Saudi Arabian Grand Prix',
+        circuit: 'Jeddah Corniche Circuit',
+        date: new Date('2026-03-22T17:00:00.000Z'),
+        status: 'upcoming',
+        results: []
+    },
+    {
+        round: 3,
+        name: 'Australian Grand Prix',
+        circuit: 'Albert Park Circuit',
+        date: new Date('2026-04-05T05:00:00.000Z'),
+        status: 'upcoming',
+        results: []
+    },
+    {
+        round: 4,
+        name: 'Japanese Grand Prix',
+        circuit: 'Suzuka International Racing Course',
+        date: new Date('2026-04-19T05:00:00.000Z'),
+        status: 'upcoming',
+        results: []
+    },
+    {
+        round: 5,
+        name: 'Miami Grand Prix',
+        circuit: 'Miami International Autodrome',
+        date: new Date('2026-05-03T19:30:00.000Z'),
+        status: 'upcoming',
+        results: []
+    },
+    {
+        round: 6,
+        name: 'Monaco Grand Prix',
+        circuit: 'Circuit de Monaco',
+        date: new Date('2026-05-24T13:00:00.000Z'),
+        status: 'upcoming',
+        results: []
+    }
+];
+
+const raceTechByRound = {
+    1: {
+        roadType: 'permanent',
+        carType: 'balanced',
+        weatherNow: {
+            condition: 'sunny',
+            airTempC: 28,
+            trackTempC: 42,
+            humidityPct: 41,
+            windKph: 18,
+            rainChancePct: 5
+        },
+        weatherTrend: [
+            { label: 'FP', condition: 'sunny', airTempC: 31, rainChancePct: 0 },
+            { label: 'Quali', condition: 'sunny', airTempC: 29, rainChancePct: 2 },
+            { label: 'Race', condition: 'mixed', airTempC: 28, rainChancePct: 5 }
+        ],
+        gripLevel: 73,
+        setupHint: 'Rear stability under traction is key in low-speed exits.',
+        riskLevel: 'medium'
+    },
+    2: {
+        roadType: 'street',
+        carType: 'low-drag',
+        weatherNow: {
+            condition: 'night',
+            airTempC: 30,
+            trackTempC: 37,
+            humidityPct: 59,
+            windKph: 22,
+            rainChancePct: 0
+        },
+        weatherTrend: [
+            { label: 'FP', condition: 'sunny', airTempC: 34, rainChancePct: 0 },
+            { label: 'Quali', condition: 'night', airTempC: 31, rainChancePct: 0 },
+            { label: 'Race', condition: 'night', airTempC: 30, rainChancePct: 0 }
+        ],
+        gripLevel: 69,
+        setupHint: 'Trim wing for top speed while protecting rear tires in dirty air.',
+        riskLevel: 'medium'
+    },
+    3: {
+        roadType: 'hybrid',
+        carType: 'balanced',
+        weatherNow: {
+            condition: 'mixed',
+            airTempC: 21,
+            trackTempC: 29,
+            humidityPct: 63,
+            windKph: 27,
+            rainChancePct: 35
+        },
+        weatherTrend: [
+            { label: 'FP', condition: 'cloudy', airTempC: 20, rainChancePct: 20 },
+            { label: 'Quali', condition: 'mixed', airTempC: 22, rainChancePct: 30 },
+            { label: 'Race', condition: 'rain', airTempC: 19, rainChancePct: 55 }
+        ],
+        gripLevel: 62,
+        setupHint: 'Keep mechanical compliance high to ride kerbs and changing grip.',
+        riskLevel: 'high'
+    },
+    4: {
+        roadType: 'permanent',
+        carType: 'high-downforce',
+        weatherNow: {
+            condition: 'cloudy',
+            airTempC: 18,
+            trackTempC: 24,
+            humidityPct: 51,
+            windKph: 16,
+            rainChancePct: 18
+        },
+        weatherTrend: [
+            { label: 'FP', condition: 'sunny', airTempC: 19, rainChancePct: 5 },
+            { label: 'Quali', condition: 'cloudy', airTempC: 17, rainChancePct: 12 },
+            { label: 'Race', condition: 'mixed', airTempC: 18, rainChancePct: 18 }
+        ],
+        gripLevel: 78,
+        setupHint: 'Prioritize front-end confidence through high-speed direction changes.',
+        riskLevel: 'low'
+    },
+    5: {
+        roadType: 'street',
+        carType: 'low-drag',
+        weatherNow: {
+            condition: 'storm',
+            airTempC: 29,
+            trackTempC: 36,
+            humidityPct: 76,
+            windKph: 31,
+            rainChancePct: 68
+        },
+        weatherTrend: [
+            { label: 'FP', condition: 'sunny', airTempC: 32, rainChancePct: 20 },
+            { label: 'Quali', condition: 'mixed', airTempC: 30, rainChancePct: 45 },
+            { label: 'Race', condition: 'storm', airTempC: 29, rainChancePct: 68 }
+        ],
+        gripLevel: 57,
+        setupHint: 'Build for straight-line speed but leave margin for wet traction.',
+        riskLevel: 'high'
+    },
+    6: {
+        roadType: 'street',
+        carType: 'high-downforce',
+        weatherNow: {
+            condition: 'sunny',
+            airTempC: 24,
+            trackTempC: 33,
+            humidityPct: 54,
+            windKph: 11,
+            rainChancePct: 8
+        },
+        weatherTrend: [
+            { label: 'FP', condition: 'sunny', airTempC: 23, rainChancePct: 4 },
+            { label: 'Quali', condition: 'sunny', airTempC: 24, rainChancePct: 6 },
+            { label: 'Race', condition: 'mixed', airTempC: 24, rainChancePct: 8 }
+        ],
+        gripLevel: 76,
+        setupHint: 'Maximum rotation and traction for repeated low-speed acceleration zones.',
+        riskLevel: 'medium'
+    }
+};
+
 mongoose.connect(process.env.MONGODB_URI)
     .then(async () => {
         console.log('✅ Connected to MongoDB. Seeding data...');
@@ -109,10 +285,22 @@ mongoose.connect(process.env.MONGODB_URI)
         // Clear existing
         await Driver.deleteMany({});
         await Article.deleteMany({});
+        await Race.deleteMany({});
+        await RaceTech.deleteMany({});
 
         // Insert new
         await Driver.insertMany(driversData);
         await Article.insertMany(articlesData);
+        const insertedRaces = await Race.insertMany(racesData);
+
+        const raceTechDocuments = insertedRaces
+            .filter((race) => Boolean(raceTechByRound[race.round]))
+            .map((race) => ({
+                raceId: race._id,
+                ...raceTechByRound[race.round]
+            }));
+
+        await RaceTech.insertMany(raceTechDocuments);
 
         console.log('🏁 Seeding complete!');
         mongoose.connection.close();
