@@ -12,7 +12,7 @@ const Landing = () => {
         // Simulate loading assets for 2.5 seconds
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 2500);
+        }, 1500);
         return () => clearTimeout(timer);
     }, []);
 
