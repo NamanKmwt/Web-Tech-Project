@@ -3,11 +3,12 @@ import Hero from '../components/Hero';
 import NewsGrid from '../components/NewsGrid';
 import Leaderboard from '../components/Leaderboard';
 import CarShowcase from '../components/CarShowcase';
-
+import VideoShowcase from '../components/VideoShowcase';
 const Home = () => {
     return (
         <div className="bg-carbon-black text-white selection:bg-f1-red selection:text-white">
             <Hero />
+            <VideoShowcase />
             <NewsGrid />
             <Leaderboard />
             <CarShowcase />

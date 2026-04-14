@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-
+import { Link, useNavigate } from 'react-router-dom';
 const Hero = () => {
     const containerRef = useRef(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end start"]
     });
+
+    const navigate = useNavigate;
 
     const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
     const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -52,13 +54,15 @@ const Hero = () => {
                     <p className="text-lg md:text-2xl text-titanium-silver font-medium max-w-2xl mx-auto mb-8">
                         Experience the pinnacle of motorsport engineering and storytelling.
                     </p>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="bg-f1-red text-white px-8 py-4 font-bold tracking-widest uppercase hover:bg-white hover:text-carbon-black transition-colors duration-300"
-                    >
-                        Explore the Grid
-                    </motion.button>
+                    <Link to='/leaderboard'>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="bg-f1-red text-white px-8 py-4 font-bold tracking-widest uppercase hover:bg-white hover:text-carbon-black transition-colors duration-300"
+                        >
+                            Explore the Grid
+                        </motion.button>
+                    </Link>
                 </motion.div>
             </div>
 
