@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Routem, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Racing from './pages/Racing';
@@ -9,28 +9,34 @@ import { AnimatePresence } from 'framer-motion';
 import ArticlePage from './pages/ArticleContent';
 import DriverData from './pages/DriverData';
 import DriverStats from './pages/DriverStats';
-
+import { AudioProvider } from './AudioContext'; // adjust path as needed
+import Landing from './pages/Landing';
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col bg-carbon-black text-white">
-        <Navbar />
-        <main className="flex-grow">
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/racing" element={<Racing />} />
-              <Route path="/leaderboard" element={<Drivers />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/tech" element={<Tech />} />
-              <Route path="/news/:id" element={<ArticlePage />} />
-              <Route path="/drivers" element={<DriverData />} />
-              <Route path="/driver/:id" element={<DriverStats />} />
-            </Routes>
-          </AnimatePresence>
-        </main>
-      </div>
-    </Router>
+    <AudioProvider>
+      <Router>
+        <div className="min-h-screen flex flex-col bg-carbon-black text-white">
+          <Routes>
+            <Route path="/" element={<Landing />} />
+          </Routes>
+          <Navbar />
+          <main className="flex-grow">
+            <AnimatePresence mode="wait">
+              <Routes>
+                <Route path="/home" element={<Home />} />
+                <Route path="/racing" element={<Racing />} />
+                <Route path="/leaderboard" element={<Drivers />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/tech" element={<Tech />} />
+                <Route path="/news/:id" element={<ArticlePage />} />
+                <Route path="/drivers" element={<DriverData />} />
+                <Route path="/driver/:id" element={<DriverStats />} />
+              </Routes>
+            </AnimatePresence>
+          </main>
+        </div>
+      </Router>
+    </AudioProvider>
   );
 }
 
