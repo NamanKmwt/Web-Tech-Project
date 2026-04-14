@@ -146,6 +146,28 @@ app.get('/', (req, res) => {
     res.send('F1 API Server Running');
 });
 
+// app.get('/api/f1/current-teams', async (req, res) => {
+//     try {
+//         const response = await fetch('https://api.openf1.org/v1/championship_teams?session_key=latest');
+//         const data = await response.json();
+
+//         // Remove duplicate rows for teams
+//         const uniqueTeams = data.reduce((acc, current) => {
+//             const exists = acc.find(item => item.team_name === current.team_name);
+//             if (!exists) return acc.concat([current]);
+//             return acc;
+//         }, []);
+
+//         // Sort 1st to 10th
+//         const sortedTeams = uniqueTeams.sort((a, b) => a.position_current - b.position_current);
+
+//         res.json(sortedTeams);
+//     } catch (error) {
+//         console.error("Constructors Fetch Error:", error);
+//         res.status(500).json({ error: 'Failed to fetch team standings' });
+//     }
+// });
+
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
@@ -203,6 +225,46 @@ app.get('/api/f1/telemetry/:id', async (req, res) => {
         // If OpenF1 returns a 404 or crashes, silently return an empty array 
         // so the frontend just gracefully hides the telemetry dashboard.
         res.json([]);
+    }
+});
+
+// ==========================================
+// ENDPOINT: Get Constructor Standings (TEAMS)
+// ==========================================
+app.get('/api/f1/current-teams', async (req, res) => {
+    try {
+        // 1. Try to fetch the latest session
+        let response = await fetch('https://api.openf1.org/v1/championship_teams?session_key=latest');
+        let data = await response.json();
+
+        // 2. If 'latest' is a practice session (returns an error object or empty), 
+        // fallback to your known working session key (9839)
+        if (!Array.isArray(data) || data.length === 0) {
+            console.log("No points found in latest session, falling back to 9839...");
+            response = await fetch('https://api.openf1.org/v1/championship_teams?session_key=9839');
+            data = await response.json();
+        }
+
+        // 3. Absolute safety net to prevent server crashes
+        if (!Array.isArray(data)) {
+            console.error("OpenF1 returned invalid data:", data);
+            return res.json([]); // Send empty array to frontend gracefully
+        }
+
+        // Remove duplicate rows for teams
+        const uniqueTeams = data.reduce((acc, current) => {
+            const exists = acc.find(item => item.team_name === current.team_name);
+            if (!exists) return acc.concat([current]);
+            return acc;
+        }, []);
+
+        // Sort 1st to 10th
+        const sortedTeams = uniqueTeams.sort((a, b) => a.position_current - b.position_current);
+
+        res.json(sortedTeams);
+    } catch (error) {
+        console.error("Constructors Fetch Error:", error);
+        res.status(500).json({ error: 'Failed to fetch team standings' });
     }
 });
 

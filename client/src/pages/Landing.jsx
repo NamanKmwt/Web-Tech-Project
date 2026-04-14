@@ -26,7 +26,10 @@ const Landing = () => {
         setIsGlobalMuted(false);
 
         // 3. Navigate to the main site
-        navigate('/home');
+        const timer = setTimeout(() => {
+            navigate('/home');
+        }, 1500);
+        return () => clearTimeout(timer);
     };
 
     return (
