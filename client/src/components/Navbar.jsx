@@ -31,9 +31,8 @@ const Navbar = () => {
                         <span className="font-inter font-medium text-lg tracking-widest uppercase mt-1 hidden sm:block">Velocity</span>
                     </Link>
 
-                    {/* Desktop Menu */}
                     <div className="hidden md:flex space-x-8">
-                        {['Racing', 'Leaderboard', 'News', 'Tech', 'Drivers'].map((item) => (
+                        {['Racing', 'Leaderboard', 'News', 'Tech', 'Drivers', 'Rules'].map((item) => (
                             <Link
                                 key={item}
                                 to={`/${item.toLowerCase()}`}
@@ -63,7 +62,7 @@ const Navbar = () => {
                     className="md:hidden bg-carbon-black border-t border-white/10"
                 >
                     <div className="px-4 pt-2 pb-6 space-y-4">
-                        {['Racing', 'Drivers', 'News', 'Tech'].map((item) => (
+                        {['Racing', 'Drivers', 'News', 'Tech', 'Rules'].map((item) => (
                             <Link
                                 key={item}
                                 to={`/${item.toLowerCase()}`}
