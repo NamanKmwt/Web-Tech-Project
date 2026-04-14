@@ -22,7 +22,7 @@ const Hero = () => {
             >
                 <div className="absolute inset-0 bg-hero-gradient z-10"></div>
                 <img
-                    src="/images/hero.png"
+                    src="/images/hero.jpg"
                     alt="F1 Car Hero"
                     className="w-full h-full object-cover object-center"
                 />
