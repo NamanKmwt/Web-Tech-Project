@@ -1,6 +1,7 @@
 import React, { useState, Suspense, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Trophy, Users } from 'lucide-react'; // Added Trophy and Users icons
+import { API_BASE } from '../utils/fetcher';
 
 // Reusable Team Colors
 const teamColors = {
@@ -28,7 +29,7 @@ const DriverList = ({ hoveredDriver, setHoveredDriver }) => {
     const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:5001/api/f1/current-grid')
+        fetch(`${API_BASE}/f1/current-grid`)
             .then(res => res.json())
             .then(data => {
                 setGridData(data);
@@ -127,7 +128,7 @@ const TeamList = ({ hoveredTeam, setHoveredTeam }) => {
 
     useEffect(() => {
         // Fetch current championship standings from OpenF1
-        fetch('http://localhost:5001/api/f1/current-teams')
+        fetch(`${API_BASE}/f1/current-teams`)
             .then(res => res.json())
             .then(data => {
                 // Remove duplicates and sort by position
