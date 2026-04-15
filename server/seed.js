@@ -5,42 +5,6 @@ const Article = require('./models/Article');
 const Race = require('./models/Race');
 const RaceTech = require('./models/RaceTech');
 
-const driversData = [
-    {
-        id: 'max-verstappen',
-        name: 'Max Verstappen',
-        number: 1,
-        team: 'Red Bull Racing',
-        nationality: 'Dutch',
-        points: 400,
-        wins: 10,
-        podiums: 15,
-        imageUrl: '/images/drivers/max.png',
-    },
-    {
-        id: 'lewis-hamilton',
-        name: 'Lewis Hamilton',
-        number: 44,
-        team: 'Ferrari',
-        nationality: 'British',
-        points: 340,
-        wins: 5,
-        podiums: 12,
-        imageUrl: '/images/drivers/lewis.png',
-    },
-    {
-        id: 'charles-leclerc',
-        name: 'Charles Leclerc',
-        number: 16,
-        team: 'Ferrari',
-        nationality: 'Monegasque',
-        points: 320,
-        wins: 4,
-        podiums: 10,
-        imageUrl: '/images/drivers/charles.png',
-    },
-];
-
 const articlesData = [
     // --- Original 3 Articles ---
     {
@@ -104,56 +68,6 @@ const articlesData = [
     }
 ];
 
-const racesData = [
-    {
-        round: 1,
-        name: 'Bahrain Grand Prix',
-        circuit: 'Bahrain International Circuit',
-        date: new Date('2026-03-08T15:00:00.000Z'),
-        status: 'upcoming',
-        results: []
-    },
-    {
-        round: 2,
-        name: 'Saudi Arabian Grand Prix',
-        circuit: 'Jeddah Corniche Circuit',
-        date: new Date('2026-03-22T17:00:00.000Z'),
-        status: 'upcoming',
-        results: []
-    },
-    {
-        round: 3,
-        name: 'Australian Grand Prix',
-        circuit: 'Albert Park Circuit',
-        date: new Date('2026-04-05T05:00:00.000Z'),
-        status: 'upcoming',
-        results: []
-    },
-    {
-        round: 4,
-        name: 'Japanese Grand Prix',
-        circuit: 'Suzuka International Racing Course',
-        date: new Date('2026-04-19T05:00:00.000Z'),
-        status: 'upcoming',
-        results: []
-    },
-    {
-        round: 5,
-        name: 'Miami Grand Prix',
-        circuit: 'Miami International Autodrome',
-        date: new Date('2026-05-03T19:30:00.000Z'),
-        status: 'upcoming',
-        results: []
-    },
-    {
-        round: 6,
-        name: 'Monaco Grand Prix',
-        circuit: 'Circuit de Monaco',
-        date: new Date('2026-05-24T13:00:00.000Z'),
-        status: 'upcoming',
-        results: []
-    }
-];
 
 const raceTechByRound = {
     1: {

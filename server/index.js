@@ -5,6 +5,7 @@ const cors = require('cors');
 const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 5000;
+const Track = require('./models/Track'); 
 
 // Middleware
 app.use(cors());
@@ -21,7 +22,10 @@ const Race = require('./models/Race');
 const Article = require('./models/Article');
 const RaceTech = require('./models/RaceTech');
 
-// Routes
+// ==========================================
+// MONGODB ROUTES (Internal Database)
+// ==========================================
+
 app.get('/api/drivers', async (req, res) => {
     try {
         const drivers = await Driver.find().sort({ points: -1 });
@@ -120,65 +124,141 @@ app.get('/api/articles', async (req, res) => {
     }
 });
 
-// Fetch a single article by ID
 app.get('/api/articles/:id', async (req, res) => {
     try {
         const articleId = req.params.id;
-
-        // Find the article in your MongoDB database
         const article = await Article.findById(articleId);
 
         if (!article) {
-            // Return a clean JSON 404 error, NOT HTML
             return res.status(404).json({ error: 'Article not found.' });
         }
 
         res.json(article);
     } catch (error) {
         console.error("Error fetching article by ID:", error.message);
-        // This catches malformed IDs (e.g., if it's not a valid 24-character hex string)
         res.status(500).json({ error: 'Invalid ID format or internal server error' });
     }
 });
 
-// Hello endpoint
 app.get('/', (req, res) => {
     res.send('F1 API Server Running');
 });
 
-// app.get('/api/f1/current-teams', async (req, res) => {
-//     try {
-//         const response = await fetch('https://api.openf1.org/v1/championship_teams?session_key=latest');
-//         const data = await response.json();
+// ==========================================
+// EXTERNAL API ROUTES (Wikipedia & OpenF1)
+// ==========================================
 
-//         // Remove duplicate rows for teams
-//         const uniqueTeams = data.reduce((acc, current) => {
-//             const exists = acc.find(item => item.team_name === current.team_name);
-//             if (!exists) return acc.concat([current]);
-//             return acc;
-//         }, []);
+// Get Driver Biography (Wikipedia)
+// ==========================================
+// ENDPOINT: Get Driver Biography (Wikipedia)
+// ==========================================
+app.get('/api/f1/bio/:name', async (req, res) => {
+    try {
+        const rawName = req.params.name;
+        console.log(`🔍 Attempting to fetch bio for: "${rawName}"`);
 
-//         // Sort 1st to 10th
-//         const sortedTeams = uniqueTeams.sort((a, b) => a.position_current - b.position_current);
+        // 1. Fix the ALL CAPS last name issue (e.g., "Lewis HAMILTON" -> "Lewis Hamilton")
+        const titleCaseName = rawName
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
 
-//         res.json(sortedTeams);
-//     } catch (error) {
-//         console.error("Constructors Fetch Error:", error);
-//         res.status(500).json({ error: 'Failed to fetch team standings' });
-//     }
-// });
+        // 2. Wikipedia Exception Dictionary (Using Title Case keys now)
+        const wikiExceptions = {
+            "Carlos Sainz": "Carlos_Sainz_Jr.",
+            "Sergio Perez": "Sergio_Pérez",
+            "Nico Hulkenberg": "Nico_Hülkenberg",
+            "Zhou Guanyu": "Zhou_Guanyu",
+            "Guanyu Zhou": "Zhou_Guanyu",
+            "Kimi Antonelli": "Andrea_Kimi_Antonelli"
+        };
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+        // Format for Wikipedia URL
+        let wikiName = wikiExceptions[titleCaseName] || titleCaseName.replace(/\s+/g, '_');
+        const wikiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiName)}`;
+
+        // 3. Add the User-Agent header (This fixes the 403 Forbidden error!)
+        const response = await axios.get(wikiUrl, {
+            headers: {
+                'User-Agent': 'F1WebProjectApp/1.0 (your-email@example.com)' 
+            }
+        });
+
+        if (response.data.type === "disambiguation") {
+            throw new Error("Wikipedia returned a disambiguation page.");
+        }
+
+        res.json({ 
+            bio: response.data.extract,
+            sourceUrl: response.data.content_urls?.desktop?.page
+        });
+        
+    } catch (error) {
+        // We look at error.response.status to give you better debugging logs
+        const status = error.response ? error.response.status : 'Unknown';
+        console.error(`❌ Bio error [Status ${status}] for ${req.params.name}:`, error.message);
+        
+        res.json({ 
+            bio: "Biography currently unavailable.",
+            sourceUrl: null
+        });
+    }
+});
+// Ensure you have these required at the top of your file
+// const Track = require('./models/Track');
+// const axios = require('axios');
+
+// ==========================================
+// ENDPOINT: Get Track Details (OpenF1 + MongoDB)
+// ==========================================
+app.get('/api/f1/track-info/:locationName', async (req, res) => {
+    try {
+        const rawLocation = req.params.locationName;
+        
+        // 1. FORMAT NAME: "united states" -> "United States"
+        const location = rawLocation.split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+        
+        console.log(`📡 Fetching data for: ${location}`);
+
+        // 2. FETCH DATA (Parallel for speed)
+        const [trackMapData, openF1Response] = await Promise.all([
+            Track.findOne({ locationName: location }),
+            axios.get(`https://api.openf1.org/v1/meetings?year=2026&country_name=${location}`)
+        ]);
+
+        // 3. GENERATE THE CARBON ICON URL
+        // Formula 1 uses a predictable pattern: [Country]%20carbon.png
+        const trackIconUrl = `https://media.formula1.com/content/dam/fom-website/2018-redesign-assets/Track%20icons%204x3/${location.replace(' ', '%20')}%20carbon.png`;
+
+        let officialName = location;
+        if (openF1Response.data && openF1Response.data.length > 0) {
+            officialName = openF1Response.data[0].meeting_official_name || location;
+        }
+
+        res.json({
+            circuitName: officialName,
+            trackIconUrl: trackIconUrl,
+            mapData: trackMapData ? {
+                svgPath: trackMapData.svgPath,
+                nodes: trackMapData.nodes
+            } : null
+        });
+
+    } catch (error) {
+        console.error(`❌ Track info error:`, error.message);
+        res.status(500).json({ error: "Failed to sync track data." });
+    }
 });
 
+// Caching setup for OpenF1
 let f1Cache = { data: null, lastFetched: 0 };
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 app.get('/api/f1/current-grid', async (req, res) => {
     const now = Date.now();
 
-    // 1. Check if we have valid cached data
     if (f1Cache.data && (now - f1Cache.lastFetched < CACHE_DURATION)) {
         console.log("Serving from Cache ⚡");
         return res.json(f1Cache.data);
@@ -186,11 +266,7 @@ app.get('/api/f1/current-grid', async (req, res) => {
 
     try {
         console.log("Fetching fresh data from OpenF1...");
-
-        // Use a 2025 session key as a "Stable Fallback" while we wait for 2026 race data
-        // 9693 is the 2025 Abu Dhabi GP
-        const sessionKey = 9693;
-
+        const sessionKey = 9693; // 2025 Abu Dhabi fallback
         const driversRes = await axios.get(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`);
 
         const responseData = {
@@ -198,16 +274,11 @@ app.get('/api/f1/current-grid', async (req, res) => {
             drivers: driversRes.data
         };
 
-        // 2. Save to Cache
         f1Cache = { data: responseData, lastFetched: now };
-
         res.json(responseData);
     } catch (error) {
         console.error("Backend Error:", error.message);
-
-        // 3. Emergency Fallback: If the API is down/rate-limited, return whatever is in cache
         if (f1Cache.data) return res.json(f1Cache.data);
-
         res.status(error.response?.status || 500).json({ error: "F1 API is currently overloaded" });
     }
 });
@@ -217,50 +288,37 @@ app.get('/api/f1/telemetry/:id', async (req, res) => {
         const driverId = req.params.id;
         const sessionKey = 9693; // Abu Dhabi fallback
 
-        // Fetch from OpenF1
         const response = await axios.get(`https://api.openf1.org/v1/car_data?driver_number=${driverId}&session_key=${sessionKey}&speed>=300`);
         res.json(response.data);
     } catch (error) {
         console.error(`Telemetry error for driver ${req.params.id}:`, error.message);
-        // If OpenF1 returns a 404 or crashes, silently return an empty array 
-        // so the frontend just gracefully hides the telemetry dashboard.
         res.json([]);
     }
 });
 
-// ==========================================
-// ENDPOINT: Get Constructor Standings (TEAMS)
-// ==========================================
 app.get('/api/f1/current-teams', async (req, res) => {
     try {
-        // 1. Try to fetch the latest session
         let response = await fetch('https://api.openf1.org/v1/championship_teams?session_key=latest');
         let data = await response.json();
 
-        // 2. If 'latest' is a practice session (returns an error object or empty), 
-        // fallback to your known working session key (9839)
         if (!Array.isArray(data) || data.length === 0) {
             console.log("No points found in latest session, falling back to 9839...");
             response = await fetch('https://api.openf1.org/v1/championship_teams?session_key=9839');
             data = await response.json();
         }
 
-        // 3. Absolute safety net to prevent server crashes
         if (!Array.isArray(data)) {
             console.error("OpenF1 returned invalid data:", data);
-            return res.json([]); // Send empty array to frontend gracefully
+            return res.json([]); 
         }
 
-        // Remove duplicate rows for teams
         const uniqueTeams = data.reduce((acc, current) => {
             const exists = acc.find(item => item.team_name === current.team_name);
             if (!exists) return acc.concat([current]);
             return acc;
         }, []);
 
-        // Sort 1st to 10th
         const sortedTeams = uniqueTeams.sort((a, b) => a.position_current - b.position_current);
-
         res.json(sortedTeams);
     } catch (error) {
         console.error("Constructors Fetch Error:", error);
@@ -279,4 +337,11 @@ app.get('/api/test-f1', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+});
+
+// ==========================================
+// SERVER STARTUP
+// ==========================================
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+// The import is now generic as the page is functional
+import { MapPin, Ticket, ChevronRight } from 'lucide-react'; 
 
-// Helper to generate a clean filename from the API's country name
 const getScenicBackground = (countryName) => {
     if (!countryName) return '/images/races/default-track.png';
-
-    // Converts "Saudi Arabia" -> "saudi-arabia"
     const safeName = countryName.toLowerCase().replace(/\s+/g, '-');
-    // Using .png to match your original static data format!
     return `/images/races/${safeName}.png`;
 };
 
@@ -19,7 +17,8 @@ const Racing = () => {
     const [filterStatus, setFilterStatus] = useState('All');
 
     useEffect(() => {
-        const currentYear = new Date().getFullYear();
+        // Force 2026 to align with your project data
+        const currentYear = 2026;
 
         fetch(`https://api.openf1.org/v1/meetings?year=${currentYear}`)
             .then(res => res.json())
@@ -27,7 +26,6 @@ const Racing = () => {
                 const officialRaces = data
                     .filter(meeting => !meeting.meeting_name.toLowerCase().includes('testing'))
                     .sort((a, b) => new Date(a.date_start) - new Date(b.date_start))
-                    // Pre-calculate the round number so it doesn't change when we filter the list!
                     .map((race, index) => ({ ...race, round_number: index + 1 }));
 
                 setRaces(officialRaces);
@@ -50,7 +48,6 @@ const Racing = () => {
         return today > raceDate ? 'Completed' : 'Upcoming';
     };
 
-    // Filter the races based on the selected status button
     const filteredRaces = races.filter(race => {
         if (filterStatus === 'All') return true;
         return getRaceStatus(race.date_end) === filterStatus;
@@ -58,54 +55,45 @@ const Racing = () => {
 
     return (
         <div className="pt-28 pb-20 min-h-screen bg-carbon-black text-white px-4">
-            <div className="max-w-5xl mx-auto">
-                {/* Header */}
+            <div className="max-w-6xl mx-auto">
+                {/* --- HEADER --- */}
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="mb-8 text-center md:text-left"
+                    className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6"
                 >
-                    <span className="text-f1-red font-bold uppercase tracking-widest text-sm mb-2 block">{new Date().getFullYear()} Season</span>
-                    <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter">RACING <span className="text-titanium-silver">CALENDAR</span></h1>
+                    <div>
+                        <span className="text-f1-red font-black uppercase tracking-[0.4em] text-[10px] mb-2 block">Season Schedule</span>
+                        <h1 className="text-6xl font-black italic tracking-tighter leading-none uppercase">
+                            Racing <span className="text-white/20">Calendar</span>
+                        </h1>
+                    </div>
+
+                    {/* Filter Tabs */}
+                    <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
+                        {['All', 'Upcoming', 'Completed'].map((status) => (
+                            <button
+                                key={status}
+                                onClick={() => setFilterStatus(status)}
+                                className={`px-6 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                                    filterStatus === status ? 'bg-f1-red text-white shadow-lg' : 'text-gray-500 hover:text-white'
+                                }`}
+                            >
+                                {status}
+                            </button>
+                        ))}
+                    </div>
                 </motion.div>
 
-                {/* Filter Buttons */}
-                {!loading && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex flex-wrap justify-center md:justify-start gap-3 mb-10"
-                    >
-                        {['All', 'Upcoming', 'Completed'].map((status) => {
-                            const isActive = filterStatus === status;
-
-                            return (
-                                <button
-                                    key={status}
-                                    onClick={() => setFilterStatus(status)}
-                                    className={`px-6 py-2 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest transition-all duration-300 border ${isActive
-                                            ? 'bg-f1-red border-f1-red text-white'
-                                            : 'bg-transparent border-white/10 text-titanium-silver hover:border-white/30 hover:text-white'
-                                        }`}
-                                >
-                                    {status}
-                                </button>
-                            );
-                        })}
-                    </motion.div>
-                )}
-
+                {/* --- RACE LIST --- */}
                 {loading ? (
-                    // Loading Skeletons
-                    <div className="space-y-4">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="min-h-[200px] bg-white/5 border border-white/10 animate-pulse rounded-xl" />
+                    <div className="grid grid-cols-1 gap-4">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="h-48 bg-white/5 rounded-2xl animate-pulse border border-white/5" />
                         ))}
                     </div>
                 ) : (
-                    // Race List Wrapper
-                    <motion.div layout className="space-y-4">
+                    <div className="grid grid-cols-1 gap-6">
                         <AnimatePresence mode="popLayout">
                             {filteredRaces.map((race) => {
                                 const status = getRaceStatus(race.date_end);
@@ -115,87 +103,73 @@ const Racing = () => {
                                     <motion.div
                                         layout
                                         key={race.meeting_key}
-                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                                        transition={{ duration: 0.4 }}
-                                        className={`relative overflow-hidden p-6 flex flex-col md:flex-row items-start md:items-center justify-between group rounded-xl border transition-all duration-500 min-h-[200px] ${isCompleted ? 'border-white/5 opacity-70 hover:opacity-100' : 'border-white/10 hover:border-f1-red'
-                                            }`}
+                                        exit={{ opacity: 0, scale: 0.98 }}
+                                        className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 min-h-[180px] flex items-center ${
+                                            isCompleted ? 'border-white/5 opacity-60' : 'border-white/10 hover:border-f1-red/50'
+                                        }`}
                                     >
-                                        {/* SCENIC BACKGROUND - VIBRANT STYLE RESTORED */}
+                                        {/* Background Image */}
                                         <img
                                             src={getScenicBackground(race.country_name)}
-                                            alt={race.circuit_short_name}
-                                            className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 z-0 group-hover:scale-105"
-                                            onError={(e) => {
-                                                // Fallback if local image doesn't exist yet
-                                                e.target.src = 'https://images.unsplash.com/photo-1541348263662-e06836264be8?q=80&w=1000&auto=format&fit=crop';
-                                            }}
+                                            alt={race.country_name}
+                                            className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-700"
+                                            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1541348263662-e06836264be8?auto=format&fit=crop&w=1000&q=80'; }}
                                         />
+                                        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
 
-                                        {/* GRADIENT OVERLAY - Lightened so right side is highly visible */}
-                                        <div className="absolute inset-0 z-0 bg-gradient-to-r from-carbon-black via-carbon-black/60 to-transparent" />
-
-                                        {/* Track Map Watermark overlaying the scenic photo */}
-                                        {race.circuit_image && (
-                                            <div
-                                                className="absolute inset-y-0 right-0 w-1/3 z-0 bg-contain bg-right bg-no-repeat opacity-30 pointer-events-none mix-blend-screen transition-transform duration-700 group-hover:scale-110"
-                                                style={{ backgroundImage: `url(${race.circuit_image})`, backgroundPosition: 'calc(100% + 20px) center' }}
-                                            />
-                                        )}
-
-                                        {/* Left Side: Number & Name */}
-                                        <div className="relative z-10 flex items-center space-x-6 mb-4 md:mb-0 w-full md:w-auto">
-                                            <div className={`flex flex-col items-center justify-center min-w-[80px] h-20 backdrop-blur-md rounded-lg transition-colors duration-300 shadow-xl border border-white/10 ${isCompleted ? 'bg-black/40' : 'bg-black/60 group-hover:bg-f1-red'
-                                                }`}>
-                                                <span className={`text-xs font-bold uppercase tracking-widest ${isCompleted ? 'text-white/50' : 'text-titanium-silver group-hover:text-white'}`}>Round</span>
-                                                <span className="text-3xl font-black italic text-white">{race.round_number}</span>
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center space-x-3 mb-1">
-                                                    {race.country_flag && (
-                                                        <img src={race.country_flag} alt={race.country_name} className="w-6 h-auto rounded-sm drop-shadow-md" />
-                                                    )}
-                                                    <h3 className="text-2xl font-bold italic text-white drop-shadow-lg">{race.meeting_name}</h3>
+                                        {/* Content */}
+                                        <div className="relative z-10 w-full px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                            <div className="flex items-center gap-8">
+                                                {/* Round Number */}
+                                                <div className="text-center">
+                                                    <p className="text-[9px] font-black uppercase text-f1-red tracking-widest mb-1">RND</p>
+                                                    <p className="text-4xl font-black italic leading-none">{race.round_number}</p>
                                                 </div>
-                                                <p className="text-white/80 text-sm flex items-center gap-2 drop-shadow-md font-medium">
-                                                    <span className={`w-1.5 h-1.5 rounded-full inline-block ${isCompleted ? 'bg-white/40' : 'bg-f1-red'}`} />
-                                                    {race.location}, {race.country_name}
-                                                </p>
-                                            </div>
-                                        </div>
 
-                                        {/* Right Side: Date & Button */}
-                                        <div className="relative z-10 flex items-center gap-3 sm:gap-6 w-full md:w-auto justify-between md:justify-end mt-4 md:mt-0">
-                                            <div className="text-left md:text-right bg-black/50 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
-                                                <span className={`block text-xl font-bold ${isCompleted ? 'text-white/70' : 'text-white'}`}>
-                                                    {formatRaceDate(race.date_start)}
-                                                </span>
-                                                <span className={`text-xs uppercase tracking-widest font-semibold ${isCompleted ? 'text-white/40' : 'text-f1-red'}`}>
-                                                    {status}
-                                                </span>
+                                                {/* Race Info */}
+                                                <div>
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <h3 className="text-2xl font-black italic uppercase tracking-tighter">{race.meeting_name}</h3>
+                                                        {race.country_flag && <img src={race.country_flag} className="h-4 rounded-sm shadow-sm" alt="flag" />}
+                                                    </div>
+                                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2">
+                                                        <MapPin size={12} className="text-f1-red" /> {race.location}
+                                                    </p>
+                                                </div>
                                             </div>
 
-                                            {!isCompleted && (
-                                                <button
-                                                    onClick={() => navigate('/tickets-coming-soon', {
-                                                        state: {
-                                                            raceName: race.meeting_name,
-                                                            raceDate: race.date_start,
-                                                            raceLocation: `${race.location}, ${race.country_name}`,
-                                                        }
-                                                    })}
-                                                    className="px-5 sm:px-8 py-3 bg-white text-carbon-black border border-transparent uppercase tracking-widest text-[10px] sm:text-xs font-black hover:bg-f1-red hover:text-white transition-all duration-300 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_20px_rgba(255,24,1,0.6)]"
-                                                >
-                                                    Tickets
-                                                </button>
-                                            )}
+                                            {/* Date & Action */}
+                                            <div className="flex items-center gap-8">
+                                                <div className="text-right">
+                                                    <p className="text-xl font-black italic leading-none mb-1">{formatRaceDate(race.date_start)}</p>
+                                                    <p className={`text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-gray-500' : 'text-f1-red'}`}>
+                                                        {status}
+                                                    </p>
+                                                </div>
+
+                                                {!isCompleted && (
+                                                    <button
+                                                        onClick={() => navigate('/tickets', {
+                                                            state: {
+                                                                raceName: race.meeting_name,
+                                                                raceDate: race.date_start,
+                                                                raceLocation: `${race.location}, ${race.country_name}`,
+                                                            }
+                                                        })}
+                                                        className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-black uppercase text-[10px] tracking-[0.2em] hover:bg-f1-red hover:text-white transition-all shadow-xl active:scale-95"
+                                                    >
+                                                        <Ticket size={14} /> Buy Tickets
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </motion.div>
                                 );
                             })}
                         </AnimatePresence>
-                    </motion.div>
+                    </div>
                 )}
             </div>
         </div>
