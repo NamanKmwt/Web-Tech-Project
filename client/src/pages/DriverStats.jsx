@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Flag, Users, Activity, Gauge, Zap, Settings2, BookOpen, ExternalLink } from 'lucide-react';
+import { API_BASE } from '../utils/fetcher';
 
 const driverColors = {
     'Red Bull Racing': '#3671C6',
@@ -47,14 +48,14 @@ const DriverStats = () => {
     useEffect(() => {
         setLoading(true);
 
-        const fetchDriverData = fetch('http://localhost:5001/api/f1/current-grid')
+        const fetchDriverData = fetch(`${API_BASE}/f1/current-grid`)
             .then(res => res.json())
             .then(data => {
                 setAllDrivers(data.drivers);
                 const foundDriver = data.drivers.find(d => d.driver_number.toString() === id);
                 
                 if (foundDriver) {
-                    fetch(`http://localhost:5001/api/f1/bio/${foundDriver.full_name}`)
+                    fetch(`${API_BASE}/f1/bio/${foundDriver.full_name}`)
                         .then(res => res.json())
                         .then(bioData => {
                             setBio(bioData.bio);
@@ -65,7 +66,7 @@ const DriverStats = () => {
                 return foundDriver;
             });
 
-        const fetchTelemetry = fetch(`http://localhost:5001/api/f1/telemetry/${id}`)
+        const fetchTelemetry = fetch(`${API_BASE}/f1/telemetry/${id}`)
             .then(res => res.json())
             .then(data => {
                 if (data && data.length > 0) {

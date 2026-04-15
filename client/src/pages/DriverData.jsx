@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '../utils/fetcher';
 
 // Fallback colors if OpenF1 is missing them
 const driverColors = {
@@ -32,7 +33,7 @@ const DriverData = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('http://localhost:5001/api/f1/current-grid')
+        fetch(`${API_BASE}/f1/current-grid`)
             .then(res => res.json())
             .then(data => {
                 // Sort drivers by team name so teammates are grouped together
