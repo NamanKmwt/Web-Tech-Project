@@ -203,18 +203,12 @@ mongoose.connect(process.env.MONGODB_URI)
         await RaceTech.deleteMany({});
 
         // Insert new
-        await Driver.insertMany(driversData);
         await Article.insertMany(articlesData);
-        const insertedRaces = await Race.insertMany(racesData);
+    
 
-        const raceTechDocuments = insertedRaces
-            .filter((race) => Boolean(raceTechByRound[race.round]))
-            .map((race) => ({
-                raceId: race._id,
-                ...raceTechByRound[race.round]
-            }));
+        
 
-        await RaceTech.insertMany(raceTechDocuments);
+       
 
         console.log('🏁 Seeding complete!');
         mongoose.connection.close();
